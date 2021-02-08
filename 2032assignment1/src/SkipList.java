@@ -3,13 +3,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
 import java.util.TreeMap;
 
 public class SkipList<T> implements List<T> {
-	private TreeMap<Integer, T> map;
-	private int size;
-	public int height;
+	private int size = 0;
+	public int height = 1;
 	private Node<T> head;
+	private Random random;
+	private final double p = 0.5;
+	private final int MAX_LEVEL = 20;
 
 	private static class Node<T> {
 		T item;
@@ -27,9 +30,7 @@ public class SkipList<T> implements List<T> {
 	 * Creates an empty Skip List
 	 */
 	public SkipList() {
-		map = new TreeMap<>();
-		size = 0;
-		height = 0;
+		//TODO
 	}
 
 	/**
@@ -57,6 +58,43 @@ public class SkipList<T> implements List<T> {
 	@Override
 	public void add(int index, T item) {
 		// TODO Auto-generated method stub
+		if (index < 0 || index > size) {
+			throw new IndexOutOfBoundsException("Index: "+index+", Size: " +size);
+		}
+		int lvl = assignNodeHeight();
+		if( lvl > height) { //grow if necessary
+			for (int i = lvl; i > height; i--) {
+				Node<T> node = new Node <> (null);
+				node.down = head;
+				node.forward = //TODO
+				node.dist = //TODO
+				head = node;
+			}
+			height = lvl;
+		}
+		int pos = 0; //pos = pos(x) - the element after which we insert
+		int currentLevel = height;
+		Node <T> lastInserted = null; // the subsequent, lower new copies will be attached to this
+		for (Node <T> x = head; /*TODO*/){
+			while(/*TODO*/ <= index) {
+				pos = pos + x.dist;
+				x = x.forward;
+			}
+			if (currentLevel > lvl) {
+				//TODO -do not insert: just update distances
+			}else { //TODO -Insert an item at this level
+				Node<T> y = new Node <>(element);
+				/*TODO -insert y between x and z*/
+				//new pos(z) = pos+old xofDistance[i] +1
+				//new pos(y) = k +1
+				//new y.distance = new pos(z) - new pos(y)
+				//ofDistance = new pos(y) - new pos(x)
+				if(lastInserted != null) lastInserted.down = y;
+				lastInserted = y;
+			}
+		}
+		size++;
+				
 
 	}
 
@@ -106,14 +144,10 @@ public class SkipList<T> implements List<T> {
 	}
 
 	private int assignNodeHeight() {
-		int i = 0;
-		boolean isHeightReached = false;
-		while (isHeightReached == false) {
-			if (Math.random() < 0.5) { // winning case
-				isHeightReached = true;
-			} else
-				i++;
-		}
+		int i = 1;
+		while (random.nextDouble() < 0.5 && i < 20) {
+			i++;
+			}
 		return i;
 	}
 
