@@ -6,42 +6,93 @@ import java.util.ListIterator;
 import java.util.TreeMap;
 
 public class SkipList<T> implements List<T> {
+	private TreeMap <Integer, T> map;
+	private int size;
+	private int listHeight;
+	private Node<T> head;
 
-	@Override
-	public boolean add(T arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	private static class Node<T>{
+		T item;
+		Node<T> forward;
+		Node<T> down;
+		int dist;
+		
+		Node(T item){
+			this.item = item;
+		}
+		
+		private void addNode() {
+			
+		}
+
 	}
 
+	/**
+	 * Adds item to end of list
+	 * @param item		item to be added
+	 * @return true 	item has been added
+	 */
 	@Override
-	public void add(int arg0, T arg1) {
+	public boolean add(T item) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+	
+	/**
+	 * Adds item to specific index on list. Previous item in index gets moved forward
+	 * @param index		position in list item is added to.
+	 * @param item		item to be added
+	 */
+	@Override
+	public void add(int index, T item) {
 		// TODO Auto-generated method stub
 
 	}
-
+	
+	/**
+	 * Returns item inside specified index
+	 * @param index		position in the list the item to be returned has
+	 * @return item		item to be returned
+	 */
 	@Override
-	public T get(int arg0) {
+	public T get(int index) {
 		// TODO Auto-generated method stub
-		return null;
+		T item = null;
+		return item;
 	}
-
+	
+	/**
+	 * Returns size of list
+	 * @return size		size of list
+	 */
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return size;
 	}
-
+	
+	/**
+	 * Removes all items in list
+	 */
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
 
 	}
-
+	
+	/**
+	 * Describes contents of list in string form
+	 * @return report		contents inside list
+	 */
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return null;
+		String report = null;
+		return report;
 
+	}
+	
+	private void assignNodeHeight() {
+		
 	}
 	
 	/* Below are any unused methods that aren't needed for the implementation,
