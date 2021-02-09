@@ -30,7 +30,7 @@ public class SkipList<T> implements List<T> {
 	 * Creates an empty Skip List
 	 */
 	public SkipList() {
-		//TODO
+		// TODO
 	}
 
 	/**
@@ -42,15 +42,13 @@ public class SkipList<T> implements List<T> {
 	@Override
 	public boolean add(T item) {
 		// TODO Auto-generated method stub
-		map.put(size, item);
 		size++;
 		assignNodeHeight();// IDK what to put in as parameters
 		return true;
 	}
 
 	/**
-	 * Adds item to specific index on list. Previous item in index gets moved
-	 * forward
+	 * Inserts a new item immediately after specified index
 	 * 
 	 * @param index position in list item is added to.
 	 * @param item  item to be added
@@ -58,37 +56,41 @@ public class SkipList<T> implements List<T> {
 	@Override
 	public void add(int index, T item) {
 		// TODO Auto-generated method stub
-		if (index < 0 || index > size) {
+		if (index < 0 || index > size) { //bad index
 			throw new IndexOutOfBoundsException("Index: "+index+", Size: " +size);
 		}
 		int lvl = assignNodeHeight();
-		if( lvl > height) { //grow if necessary
-			for (int i = lvl; i > height; i--) {
-				Node<T> node = new Node <> (null);
+		if(lvl > height) { //grow if necessary
+			for (int i = lvl; i > height; i--) { //amount of times run is the difference between lvl and height
+				Node<T> node = new Node <> (null); //create new node on top of column of head nodes at the start
 				node.down = head;
-				node.forward = //TODO
-				node.dist = //TODO
+				node.forward = null;
+				node.dist = size +1;
 				head = node;
 			}
-			height = lvl;
+			height = lvl; //update height
 		}
+		/* find where we need to insert item (nodes that are supposed to connect to it)*/
+		Node <T> x = head; //node in question (N.I.Q)
 		int pos = 0; //pos = pos(x) - the element after which we insert
 		int currentLevel = height;
 		Node <T> lastInserted = null; // the subsequent, lower new copies will be attached to this
-		for (Node <T> x = head; /*TODO*/){
-			while(/*TODO*/ <= index) {
-				pos = pos + x.dist;
-				x = x.forward;
+		for (int i = height; i>1 ; i-- ){ //for each head node in column except base layer
+			while(pos + x.dist <= index) { //looks at where node in question's forward node goes
+				pos = pos + x.dist; //go to new position if N.I.Q's forward node is less than wanted index
+				x = x.forward; //update N.I.Q
 			}
 			if (currentLevel > lvl) {
 				//TODO -do not insert: just update distances
-			}else { //TODO -Insert an item at this level
-				Node<T> y = new Node <>(element);
-				/*TODO -insert y between x and z*/
-				//new pos(z) = pos+old xofDistance[i] +1
-				//new pos(y) = k +1
-				//new y.distance = new pos(z) - new pos(y)
-				//ofDistance = new pos(y) - new pos(x)
+				x.dist = x.dist+1; //IDK why we need to do this but the pseudo-code in the class notes tell me this
+			}else { //TODO -insert y between x and z
+				Node<T> y = new Node <>(item);
+				Node<T> z = new Node <>(item);
+				y.forward = z;
+				x.forward = y;
+				y.dist = pos + x.dist - index;
+				x.dist = index + 1 - pos;
+				
 				if(lastInserted != null) lastInserted.down = y;
 				lastInserted = y;
 			}
@@ -147,7 +149,7 @@ public class SkipList<T> implements List<T> {
 		int i = 1;
 		while (random.nextDouble() < 0.5 && i < 20) {
 			i++;
-			}
+		}
 		return i;
 	}
 
