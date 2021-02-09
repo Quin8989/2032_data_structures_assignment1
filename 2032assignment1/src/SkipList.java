@@ -186,8 +186,12 @@ public class SkipList<E> implements List<E> {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		String report = null;
-		return report;
+		String report = "";
+		Node<E> x = head; // node in question (N.I.Q)
+		for (int currentLvl = height; currentLvl >= 0; currentLvl--) { //goes through every layer of list
+		
+		}
+		    return report;
 
 	}
 	
