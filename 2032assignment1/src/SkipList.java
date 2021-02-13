@@ -6,6 +6,8 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.TreeMap;
 
+/* This implementation of the skip list uses parts of code shared in class lecture 05 slide 33*/
+
 public class SkipList<E> implements List<E> {
 	private int size = 0;
 	private int height = 1;
