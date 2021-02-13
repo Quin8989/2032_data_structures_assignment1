@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 public class SkipList<E> implements List<E> {
 	private int size = 0;
-	public int height = 1;
+	private int height = 1;
 	private Node<E> head;
 	private Random random;
 	private final double p = 0.5;
@@ -23,19 +23,18 @@ public class SkipList<E> implements List<E> {
 		Node(E item) {
 			this.item = item;
 		}
-
 	}
 
 	/**
 	 * Creates an empty Skip List
 	 */
 	public SkipList() {
-		// TODO
-		Node<E> node = new Node<>(null); //create head node on lowest level
+		Node<E> node = new Node<>(null); // create head node on lowest level
 		node.forward = null;
 		node.down = null;
 		node.dist = size + 1;
 		head = node;
+		random = new Random();
 	}
 
 	/**
@@ -46,47 +45,7 @@ public class SkipList<E> implements List<E> {
 	 */
 	@Override
 	public boolean add(E item) {
-		// TODO Auto-generated method stub
-		int lvl = assignNodeHeight();
-		if (lvl > height) { // grow if necessary
-			for (int i = lvl; i > height; i--) { // amount of times run is the difference between lvl and height
-				Node<E> node = new Node<>(null); // create new node on top of column of head nodes at the start
-				node.down = head;
-				node.forward = null;
-				node.dist = size + 1;
-				head = node;
-			}
-			height = lvl; // update height
-		}
-		/*
-		 * find where we need to insert item (nodes that are supposed to connect to it)
-		 */
-		Node<E> x = head; // node in question (N.I.Q)
-		int pos = 0; // pos = pos(x) - the element after which we insert
-		int currentLevel = height;
-		Node<E> lastInserted = null; // the subsequent, lower new copies will be attached to this
-		for (int i = height; i > 1; i--) { // for each head node in column except base layer
-			while (pos + x.dist <= size) { // looks at where node in question's forward node goes
-				pos = pos + x.dist; // go to new position if N.I.Q's forward node is less than size of list
-				x = x.forward; // update N.I.Q
-			}
-			if (currentLevel > lvl) {
-				// TODO -do not insert: just update distances
-				x.dist = x.dist + 1; // IDK why we need to do this but the pseudo-code in the class notes tell me
-										// this
-			} else { // TODO -insert y after x
-				Node<E> y = new Node<>(item);
-				y.forward = null;
-				x.forward = y;
-				x.dist = pos + 1 - size;
-
-				if (lastInserted != null)
-					lastInserted.down = y;
-				lastInserted = y;
-			}
-		}
-		size++;
-		
+		add(this.size(), item);
 		return true;
 	}
 
@@ -95,10 +54,11 @@ public class SkipList<E> implements List<E> {
 	 * 
 	 * @param index position in list item is added to.
 	 * @param item  item to be added
+	 * 
+	 * @throws IndexOutOfBoundsException if index is out of list range
 	 */
 	@Override
 	public void add(int index, E item) {
-		// TODO Auto-generated method stub
 		if (index < 0 || index > size) { // bad index
 			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
 		}
@@ -116,29 +76,30 @@ public class SkipList<E> implements List<E> {
 		/*
 		 * find where we need to insert item (nodes that are supposed to connect to it)
 		 */
-		Node<E> x = head; // node in question (N.I.Q)
 		int pos = 0; // pos = pos(x) - the element after which we insert
 		int currentLevel = height;
 		Node<E> lastInserted = null; // the subsequent, lower new copies will be attached to this
-		for (int i = height; i > 1; i--) { // for each head node in column except base layer
+		for (Node<E> x = head; x != null; x = x.down, currentLevel--) { // for each head node in column except base
+																		// layer
 			while (pos + x.dist <= index) { // looks at where node in question's forward node goes
 				pos = pos + x.dist; // go to new position if N.I.Q's forward node is less than wanted index
 				x = x.forward; // update N.I.Q
 			}
 			if (currentLevel > lvl) {
-				// TODO -do not insert: just update distances
-				x.dist = x.dist + 1; // IDK why we need to do this but the pseudo-code in the class notes tell me
-										// this
-			} else { // TODO -insert y between x and z
+				x.dist = x.dist + 1;
+
+			} else { // insert y between x and z
 				Node<E> y = new Node<>(item);
-				Node<E> z = new Node<>(item);
+				Node<E> z = x.forward;
 				y.forward = z;
 				x.forward = y;
 				y.dist = pos + x.dist - index;
 				x.dist = index + 1 - pos;
 
-				if (lastInserted != null)
+				if (lastInserted != null) {
 					lastInserted.down = y;
+
+				}
 				lastInserted = y;
 			}
 		}
@@ -151,12 +112,31 @@ public class SkipList<E> implements List<E> {
 	 * 
 	 * @param index position in the list the item to be returned has
 	 * @return item item to be returned
+	 * 
+	 * @throws IndexOutOfBoundsException if index is out of list range
 	 */
+
 	@Override
 	public E get(int index) {
-		// TODO Auto-generated method stub
-		E item = null;
-		return item;
+		int pos = 0;
+		if (index < 0 || index >= size) { // bad index
+			throw new IndexOutOfBoundsException("Index " + index + " doesnt exist!");
+		}
+		for (Node<E> i = head; i != null; i = i.down) {
+			while (pos + i.dist <= index) {
+				pos += i.dist;
+				i = i.forward;
+			}
+			if (pos == index) {
+				Node<E> item = null;
+				for (Node<E> j = i; j != null; j = j.down) {
+					item = j;
+				}
+				item = item.forward;
+				return item.item;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -172,10 +152,13 @@ public class SkipList<E> implements List<E> {
 	/**
 	 * Removes all items in list
 	 */
+
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-
+		this.head = null;
+		this.height = 0;
+		this.size = 0;
+		this.random = null;
 	}
 
 	/**
@@ -185,20 +168,55 @@ public class SkipList<E> implements List<E> {
 	 */
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		String report = "";
-		Node<E> x = head; // node in question (N.I.Q)
-		for (int currentLvl = height; currentLvl >= 0; currentLvl--) { //goes through every layer of list
-		
+		StringBuffer result = new StringBuffer();
+		result.append("[");
+		Node<E> iterator = null;
+		for (Node<E> x = head; x != null; x = x.down)
+			iterator = x;
+		int i = 0;
+		iterator = iterator.forward;
+		for (Node<E> x = iterator; x != null; x = x.forward, i++) {
+			if (i == size - 1) {
+				result.append(x.item + "]");
+			} else {
+				result.append(x.item + ", ");
+			}
 		}
-		    return report;
-
+		return result.toString();
 	}
-	
+
+	@Override
+	public E remove(int index) {
+		int pos = 0;
+		if (index < 0 || index >= size) { // bad index
+			throw new IndexOutOfBoundsException("Index " + index + " doesnt exist!");
+		}
+		for (Node<E> i = head; i != null; i = i.down) {
+			while (pos + i.dist <= index) {
+				pos += i.dist;
+				i = i.forward;
+			}
+			if (pos == index) {
+				Node<E> item = null;
+				for (Node<E> j = i; j != null; j = j.down) {
+					item = j;
+				}
+				item = item.forward;
+
+				item.forward = item.forward.forward;
+				item.down = null;
+				size--;
+				return item.item;
+			}
+		}
+		return null;
+	}
+
 	/**
-	 * Gives a number from 1 to 20 with each increment being half as common as the one before
+	 * Gives a number from 1 to 20 with each increment being half as common as the
+	 * one before
 	 * 
-	 * @return i	a number between 1 and 20
+	 * @return i a number between 1 and 20
 	 */
 	private int assignNodeHeight() { //
 		int i = 1;
@@ -265,11 +283,6 @@ public class SkipList<E> implements List<E> {
 
 	@Override
 	public boolean remove(Object arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public E remove(int arg0) {
 		throw new UnsupportedOperationException();
 	}
 
