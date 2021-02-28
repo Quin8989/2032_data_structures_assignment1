@@ -6,6 +6,8 @@ import java.util.ListIterator;
 import java.util.Random;
 import java.util.TreeMap;
 
+
+
 /* This implementation of the skip list uses parts of code shared in class lecture 05 slide 33*/
 
 public class SkipList<E> implements List<E> {
@@ -157,10 +159,13 @@ public class SkipList<E> implements List<E> {
 
 	@Override
 	public void clear() {
-		this.head = null;
-		this.height = 0;
-		this.size = 0;
-		this.random = null;
+		size = 0;
+		height = 1;
+
+		head = new Node <E> (null);
+		head.dist = 1;
+		head.forward = null;
+		head.down = null;
 	}
 
 	/**
@@ -169,50 +174,57 @@ public class SkipList<E> implements List<E> {
 	 * @return report contents inside list
 	 */
 	@Override
-	public String toString() {
-		StringBuffer result = new StringBuffer();
-		result.append("[");
-		Node<E> iterator = null;
-		for (Node<E> x = head; x != null; x = x.down)
-			iterator = x;
-		int i = 0;
-		iterator = iterator.forward;
-		for (Node<E> x = iterator; x != null; x = x.forward, i++) {
-			if (i == size - 1) {
-				result.append(x.item + "]");
-			} else {
-				result.append(x.item + ", ");
-			}
+	public String toString(){ //Code used is from the assignment solutions, author is Prof. Andriy Pavlovych
+		if (size == 0)
+			return "[]";
+
+		Node<E> node = head;
+		while(node.down != null) node = node.down; //go to the bottom level
+		node = node.forward; //skip the head sentinel
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("[");
+		for (; node != null; node = node.forward){
+			sb.append(node.item);
+			if (node.forward == null)
+				return sb.append(']').toString();
+			sb.append(',').append(' ');
 		}
-		return result.toString();
+		return null; //this line should never be reached
 	}
 
 	@Override
-	public E remove(int index) {
-		int pos = 0;
-		if (index < 0 || index >= size) { // bad index
-			throw new IndexOutOfBoundsException("Index " + index + " doesnt exist!");
+	public E remove(int index) { //Code used is from the assignment solutions, author is Prof. Andriy Pavlovych
+		if (index < 0 || index >= size){
+			throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size);
 		}
-		for (Node<E> i = head; i != null; i = i.down) {
-			while (pos + i.dist <= index) {
-				pos += i.dist;
-				i = i.forward;
-			}
-			if (pos == index) {
-				Node<E> item = null;
-				for (Node<E> j = i; j != null; j = j.down) {
-					item = j;
-				}
-				item = item.forward;
 
-				item.forward = item.forward.forward;
-				item.down = null;
-				size--;
-				return item.item;
+		int pos = -1;
+		E deletedItem = null;
+		for (Node <E> x = head; x != null; x = x.down){
+			while (pos + x.dist < index ){//stop just before the element being removed 
+				pos = pos + x.dist;
+				x = x.forward;
 			}
+			if (pos + x.dist == index){ //the element exists at the current level, remove it
+				deletedItem = x.forward.item;
+				x.dist = x.dist + x.forward.dist - 1; 
+				x.forward = x.forward.forward;
+			}
+			else x.dist--; //the element does not exist at this level, shrink the distance only.
 		}
-		return null;
+		size--;
+		//now remove the empty top levels, if any were created
+		if (head.down != null)//if there is more than one level
+			for (Node <E> x = head; x != null; x = x.down){
+				if (x.forward == null){
+					head = x.down;
+					height--;
+				}
+			}		
+		return deletedItem;
 	}
+	
 
 	/**
 	 * Gives a number from 1 to 20 with each increment being half as common as the
